@@ -1,24 +1,23 @@
-# Estágio 1: Build (Usando Java 17 para bater com seu pom.xml)
+# Estágio 1: Build
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
 COPY . .
 
-# Build limpo ignorando testes
+# Build otimizado para o Render (pula testes e economiza RAM)
 RUN mvn clean package -DskipTests
 
-# Estágio 2: Execução (Corretto 17)
+# Estágio 2: Execução
 FROM amazoncorretto:17
 WORKDIR /app
 
-# O Maven Shade gera um arquivo chamado 'automacao-stile-1.0-SNAPSHOT.jar' 
-# ou similar. Vamos usar o wildcard correto:
+# Copia o JAR gerado pelo Maven Shade
 COPY --from=build /app/target/automacao-stile-*.jar app.jar
 
-# Se você tem arquivos .ttf, garanta que o caminho de origem está correto
-# Se estiverem na raiz do projeto, o comando abaixo funciona:
-COPY *.ttf ./ 
+# Garante que a pasta da fonte exista e o arquivo esteja lá
+RUN mkdir -p .ttf
+COPY *.ttf ./.ttf/ 2>/dev/null || cp *.ttf . 2>/dev/null || true
 
 EXPOSE 8080
 
-# O Javalin/Render precisa da porta dinâmica
-CMD ["java", "-jar", "app.jar"]
+# Parâmetros -Xmx e -Xms evitam que o Java estoure os 512MB do Render Free
+CMD ["java", "-Xmx380m", "-Xms256m", "-jar", "app.jar"]
