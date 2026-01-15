@@ -15,7 +15,6 @@ import java.util.zip.ZipOutputStream;
 public class ServidorStile {
 
     public static void main(String[] args) {
-        // ADICIONADO PARA O RENDER: Captura a porta do ambiente
         String portStr = System.getenv("PORT");
         int port = (portStr != null) ? Integer.parseInt(portStr) : 8080;
 
@@ -25,8 +24,8 @@ public class ServidorStile {
 
         System.out.println("🚀 STILE STUDIO ONLINE NA PORTA: " + port);
 
+        // --- ROTA 1: GERAR COLEÇÃO COMPLETA (ZIP) ---
         app.post("/gerar-arte", ctx -> {
-            // ADICIONADO PARA O RENDER: Processamento direto em RAM (ByteArray)
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ZipOutputStream zos = new ZipOutputStream(baos);
 
@@ -40,25 +39,19 @@ public class ServidorStile {
                     UploadedFile foto = fotos.get(i);
                     String cod = foto.filename().toUpperCase().replaceAll("\\.(JPG|PNG|JPEG|jpg|png|jpeg)", "");
 
-                    // Arquivos temporários permitidos pelo Render em /tmp
                     File tempIn = File.createTempFile("stile_raw", ".jpg");
                     Files.copy(foto.content(), tempIn.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
                     File noBg = File.createTempFile("stile_nobg", ".png");
                     removerFundo(tempIn, noBg, apiKey);
 
-                    // FUNÇÃO DE DESENHO ORIGINAL (MANTIDA INTEGRALMENTE)
+                    // Implementação do design atualizado
                     BufferedImage arte = desenharStory(noBg, precosDe.get(i), precosPor.get(i), cod, i + 1);
 
-                    // Transforma a imagem em bytes para injetar no ZIP em memória
-                    ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
-                    ImageIO.write(arte, "png", imageBytes);
-
-                    zos.putNextEntry(new ZipEntry("STILE_" + (i + 1) + "_" + cod + ".png"));
-                    zos.write(imageBytes.toByteArray());
+                    zos.putNextEntry(new ZipEntry("STORY_" + cod + ".png"));
+                    ImageIO.write(arte, "png", zos);
                     zos.closeEntry();
 
-                    // Limpeza de rastros temporários
                     tempIn.delete();
                     noBg.delete();
                 }
@@ -66,83 +59,120 @@ public class ServidorStile {
                 zos.finish();
                 zos.close();
 
-                // Retorna o arquivo ZIP gerado
                 ctx.contentType("application/octet-stream");
                 ctx.header("Content-Disposition", "attachment; filename=\"pack_stile.zip\"");
                 ctx.result(new ByteArrayInputStream(baos.toByteArray()));
 
             } catch (Exception e) {
                 e.printStackTrace();
-                ctx.status(500).result("Erro no Studio: " + e.getMessage());
+                ctx.status(500).result("Erro: " + e.getMessage());
+            }
+        });
+
+        // --- ROTA 2: GERAR IMAGEM INDIVIDUAL (PNG) ---
+        app.post("/gerar-imagem", ctx -> {
+            try {
+                String apiKey = ctx.formParam("api_key");
+                UploadedFile foto = ctx.uploadedFile("foto");
+                String precoDe = ctx.formParam("preco_de");
+                String precoPor = ctx.formParam("preco_por");
+                String cod = foto.filename().toUpperCase().replaceAll("\\.(JPG|PNG|JPEG|jpg|png|jpeg)", "");
+
+                File tempIn = File.createTempFile("stile_single", ".jpg");
+                Files.copy(foto.content(), tempIn.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                File noBg = File.createTempFile("stile_nobg_single", ".png");
+                removerFundo(tempIn, noBg, apiKey);
+
+                BufferedImage arte = desenharStory(noBg, precoDe, precoPor, cod, 1);
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(arte, "png", baos);
+
+                tempIn.delete();
+                noBg.delete();
+
+                ctx.contentType("image/png");
+                ctx.result(baos.toByteArray());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                ctx.status(500).result("Erro: " + e.getMessage());
             }
         });
     }
 
-    // --- MANTENDO TODAS AS FUNÇÕES ORIGINAIS ABAIXO ---
-
-    private static BufferedImage desenharStory(File imgPng, String de, String por, String cod, int num) throws IOException {
+    // --- LÓGICA DE DESIGN IMPLEMENTADA DO SEU CÓDIGO DESKTOP ---
+    private static BufferedImage desenharStory(File imgPng, String de, String por, String codigo, int num) throws IOException {
         int w = 1080, h = 1920;
-        BufferedImage canvas = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = canvas.createGraphics();
+        BufferedImage story = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = story.createGraphics();
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // 1. FUNDO CINZA STUDIO
-        g.setColor(new Color(240, 240, 240));
+        // Cores e Fonte
+        Color roxo = new Color(145, 130, 213);
+        Color roxo50 = new Color(145, 130, 213, 128);
+        Font ultra = carregarFonte(".ttf/Ultra-Regular.ttf", 100);
+
+        // Fundo Branco/Cinza claro
+        g.setColor(new Color(245, 245, 245));
         g.fillRect(0, 0, w, h);
 
-        Font ultra = carregarFonte(".ttf/Ultra-Regular.ttf", 100);
-        Color roxo = new Color(145, 130, 213);
+        // 1. Topo: PEÇA O LINK
+        g.setFont(ultra.deriveFont(26f));
+        g.setColor(new Color(100, 100, 100));
+        centralizar(g, "PEÇA O LINK NOS COMENTÁRIOS", w, 120);
 
-        // 2. NÚMERO DA ARTE
-        g.setColor(new Color(180, 180, 180));
-        g.setFont(ultra.deriveFont(70f));
-        g.drawString(String.format("%02d", num), 60, 120);
-
-        // 3. CÓDIGO DO PRODUTO
+        // 2. Código do Produto
+        g.setFont(ultra.deriveFont(85f));
         g.setColor(roxo);
-        g.setFont(ultra.deriveFont(90f));
-        centralizar(g, cod, w, 280);
+        centralizar(g, codigo.toUpperCase(), w, 250);
 
-        // 4. IMAGEM DO PRODUTO
+        // 3. Número da Peça
+        g.setFont(ultra.deriveFont(110f));
+        g.setColor(new Color(80, 80, 80));
+        centralizar(g, String.format("%02d", num), w, 390);
+
+        // 4. Imagem do Produto centralizada
         try {
             BufferedImage prod = ImageIO.read(imgPng);
             if (prod != null) {
-                int pW = 900;
+                int pW = 850;
                 int pH = (prod.getHeight() * pW) / prod.getWidth();
-                int yImg = 400 + (1000 - pH) / 2;
+                // Cálculo de Y para manter o produto entre o código e o preço
+                int yImg = 390 + 40 + (((1480 - 80) - (390 + 40)) / 2) - (pH / 2);
                 g.drawImage(prod, (w - pW) / 2, yImg, pW, pH, null);
             }
         } catch (Exception e) {}
 
-        // 5. PREÇO "DE" (Com risco)
-        if (de != null && !de.isEmpty()) {
-            g.setColor(new Color(160, 160, 160));
-            g.setFont(ultra.deriveFont(55f));
-            String textoDe = "DE R$ " + de;
-            FontMetrics fm = g.getFontMetrics();
-            int larguraDe = fm.stringWidth(textoDe);
-            int xDe = (w - larguraDe) / 2;
-            int yDe = 1530;
-            g.drawString(textoDe, xDe, yDe);
+        // 5. Preço DE (Com o risco branco)
+        g.setFont(ultra.deriveFont(114f));
+        g.setColor(roxo50);
+        String textoDe = "R$" + de;
+        centralizar(g, textoDe, w, 1480);
 
-            g.setStroke(new BasicStroke(6));
-            g.drawLine(xDe - 10, yDe - 20, xDe + larguraDe + 10, yDe - 20);
-        }
+        // Linha branca para riscar o preço
+        g.setColor(Color.WHITE);
+        g.setStroke(new BasicStroke(18));
+        FontMetrics fm = g.getFontMetrics(ultra.deriveFont(114f));
+        int larguraDe = fm.stringWidth(textoDe);
+        g.drawLine((w/2) - (larguraDe/2) - 20, 1480 - 45, (w/2) + (larguraDe/2) + 20, 1480 - 45);
 
-        // 6. PREÇO "POR"
+        // 6. Preço POR
+        g.setFont(ultra.deriveFont(145f));
         g.setColor(roxo);
-        g.setFont(ultra.deriveFont(160f));
-        centralizar(g, "R$ " + por, w, 1720);
+        centralizar(g, "R$" + por, w, 1660);
 
-        // 7. MENSAGEM DE ENGAJAMENTO
-        g.setFont(new Font("Arial", Font.BOLD, 38));
-        g.setColor(new Color(80, 80, 80));
-        centralizar(g, "COMENTE 'EU QUERO' PARA RECEBER O LINK", w, 1860);
+        // 7. Rodapé
+        g.setFont(ultra.deriveFont(32f));
+        g.setColor(new Color(100, 100, 100));
+        centralizar(g, "COM VARIAÇÃO DE CORES", w, 1760);
+        centralizar(g, "@STILE_", w, 1870);
 
         g.dispose();
-        return canvas;
+        return story;
     }
 
     private static void removerFundo(File in, File out, String key) {
