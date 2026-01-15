@@ -1,23 +1,28 @@
-# Estágio 1: Build
+# 1. Fase de Construção (Build)
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
+
+# Copia os arquivos do projeto para o container
 COPY . .
 
-# Build otimizado para o Render (pula testes e economiza RAM)
+# Executa o build ignorando os testes para não estourar a memória
 RUN mvn clean package -DskipTests
 
-# Estágio 2: Execução
+# 2. Fase de Execução (Runtime)
 FROM amazoncorretto:17
 WORKDIR /app
 
-# Copia o JAR gerado pelo Maven Shade
+# Copia o arquivo JAR gerado na fase anterior
+# O wildcard * garante que ele pegue o arquivo mesmo com a versão no nome
 COPY --from=build /app/target/automacao-stile-*.jar app.jar
 
-# Garante que a pasta da fonte exista e o arquivo esteja lá
-RUN mkdir -p .ttf
-COPY *.ttf ./.ttf/ 2>/dev/null || cp *.ttf . 2>/dev/null || true
+# COPIA A PASTA DE FONTES (Crucial para o seu desenho de imagem)
+# O ponto antes de /app/ garante que a estrutura fique exatamente como no seu PC
+COPY .ttf ./.ttf/
 
+# Define a porta padrão
 EXPOSE 8080
 
-# Parâmetros -Xmx e -Xms evitam que o Java estoure os 512MB do Render Free
-CMD ["java", "-Xmx380m", "-Xms256m", "-jar", "app.jar"]
+# Comando de inicialização otimizado para o Render Free (512MB RAM)
+# -Xmx384m deixa uma folga para o sistema operacional não matar o processo
+CMD ["java", "-Xmx384m", "-Xms256m", "-jar", "app.jar"]
