@@ -14,7 +14,7 @@ FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-COPY --from=build /app/target/*-SNAPSHOT.jar app.jar
+COPY --from=build /target/*-shaded.jar app.jar
 
 EXPOSE 8080
 
