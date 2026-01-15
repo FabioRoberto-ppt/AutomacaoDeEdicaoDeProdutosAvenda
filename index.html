@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STILE_ STUDIO | Streetwear Automator</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --cor-primaria: #9182d5;
+            --cor-fundo: #050505;
+            --cor-card: #0f0f12;
+            --cor-borda: #1e1e24;
+            --font-heavy: 'Montserrat', sans-serif;
+            --led-roxo: 0 0 25px rgba(145, 130, 213, 0.8);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--cor-fundo);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 40px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container { width: 100%; max-width: 1100px; }
+
+        .street-title {
+            text-align: center;
+            font-family: var(--font-heavy);
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
+            letter-spacing: -4px;
+            text-transform: uppercase;
+            margin-bottom: 60px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: #fff;
+        }
+
+        .street-title:hover {
+            letter-spacing: 15px;
+            opacity: 0.3;
+            filter: blur(12px);
+            color: var(--cor-primaria);
+            transform: scale(1.05);
+        }
+
+        .upload-card {
+            background: var(--cor-card);
+            border: 1px solid var(--cor-borda);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .inputs-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .api-input {
+            background: #000;
+            border: 1px solid var(--cor-borda);
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 320px;
+            outline: none;
+            transition: var(--transition);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .api-input:focus {
+            border-color: var(--cor-primaria);
+            box-shadow: var(--led-roxo);
+            transform: scale(1.05);
+        }
+
+        .btn-upload-custom {
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            padding: 16px 46px;
+            border-radius: 50px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: var(--transition);
+        }
+
+        .btn-upload-custom:hover {
+            background-color: var(--cor-primaria);
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 30px rgba(145, 130, 213, 0.45);
+        }
+
+        .galeria {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .item-foto {
+            background: var(--cor-card);
+            border: 1px solid var(--cor-borda);
+            border-radius: 20px;
+            padding: 15px;
+            position: relative;
+            transition: var(--transition);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-foto:hover {
+            border-color: var(--cor-primaria);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+
+        .img-container {
+            width: 100%;
+            aspect-ratio: 1/1;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--cor-borda);
+        }
+
+        .item-foto img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-delete {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.4s ease;
+        }
+
+        .btn-delete:hover {
+            background: #ff3b3b;
+            border-color: #ff3b3b;
+            transform: rotate(180deg) scale(1.2);
+        }
+
+        /* ===== O BOTÃO SOLICITADO: TRANSPARENTE -> ROXO NO HOVER ===== */
+        .btn-download-single {
+            background: rgba(255, 255, 255, 0.05); /* Transparente inicial */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: none;
+        }
+
+        .btn-download-single:hover {
+            background: var(--cor-primaria); /* Fica Roxo */
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 20px rgba(145, 130, 213, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .price-group { display: flex; flex-direction: column; gap: 8px; }
+        .price-group .api-input { max-width: 100%; padding: 10px; font-size: 0.9rem; }
+
+        #btnGerar {
+            background: var(--cor-primaria);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 25px;
+            border-radius: 18px;
+            font-weight: 900;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            margin-top: 50px;
+            cursor: pointer;
+            display: none;
+            transition: var(--transition);
+        }
+
+        #btnGerar:hover {
+            transform: translateY(-3px);
+            letter-spacing: 2px;
+            filter: brightness(1.1);
+            box-shadow: 0 10px 40px rgba(145, 130, 213, 0.4);
+        }
+
+        .status-msg {
+            text-align: center;
+            margin-top: 30px;
+            font-weight: 800;
+            color: var(--cor-primaria);
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h1 class="street-title">STILE_ STUDIO</h1>
+
+    <div class="upload-card">
+        <div class="inputs-row">
+            <input type="text" id="nome_zip" class="api-input" value="COLECAO_STILE">
+            <input type="text" id="api_key" class="api-input" placeholder="API KEY REMOVE.BG">
+        </div>
+
+        <label for="inputFotos" class="btn-upload-custom">Selecionar Fotos</label>
+        <input type="file" id="inputFotos" multiple accept="image/*" onchange="adicionarFotos()" hidden>
+    </div>
+
+    <div id="galeria" class="galeria"></div>
+
+    <button id="btnGerar" onclick="enviarTudo()">Processar Coleção e Baixar ZIP</button>
+    <div id="status" class="status-msg"></div>
+</div>
+
+<script>
+    let listaMestre = [];
+
+    function adicionarFotos() {
+        const input = document.getElementById('inputFotos');
+        Array.from(input.files).forEach(f => {
+            listaMestre.push({ arquivo: f, id: Date.now() + Math.random() });
+        });
+        input.value = "";
+        renderizar();
+    }
+
+    function remover(id) {
+        listaMestre = listaMestre.filter(f => f.id !== id);
+        renderizar();
+    }
+
+    function renderizar() {
+        const galeria = document.getElementById('galeria');
+        const btn = document.getElementById('btnGerar');
+        galeria.innerHTML = "";
+        btn.style.display = listaMestre.length ? "block" : "none";
+
+        listaMestre.forEach((item, index) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const div = document.createElement('div');
+                div.className = 'item-foto';
+                div.innerHTML = `
+                <button class="btn-delete" onclick="remover(${item.id})">✕</button>
+
+                <div class="img-container">
+                    <img src="${e.target.result}">
+                </div>
+
+                <button class="btn-download-single" onclick="baixarImagem(${index})">
+                    Baixar imagem editada
+                </button>
+
+                <div class="price-group">
+                    <input id="de_${index}" class="api-input" placeholder="Preço De">
+                    <input id="por_${index}" class="api-input" placeholder="Preço Por">
+                </div>
+            `;
+                galeria.appendChild(div);
+            };
+            reader.readAsDataURL(item.arquivo);
+        });
+    }
+
+    async function baixarImagem(index) {
+        const item = listaMestre[index];
+        if (!item) return;
+
+        const formData = new FormData();
+        formData.append("foto", item.arquivo);
+        formData.append("preco_de", document.getElementById(`de_${index}`).value);
+        formData.append("preco_por", document.getElementById(`por_${index}`).value);
+        formData.append("api_key", document.getElementById("api_key").value);
+
+        try {
+            const response = await fetch("http://localhost:8080/gerar-imagem", {
+                method: "POST",
+                body: formData
+            });
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `editada_${index}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            alert("Erro ao conectar com o servidor local.");
+        }
+    }
+
+    async function enviarTudo() {
+        const formData = new FormData();
+        formData.append("api_key", document.getElementById('api_key').value);
+        formData.append("nome_zip", document.getElementById('nome_zip').value);
+
+        listaMestre.forEach((item, i) => {
+            formData.append("fotos", item.arquivo);
+            formData.append("precos_de", document.getElementById(`de_${i}`).value);
+            formData.append("precos_por", document.getElementById(`por_${i}`).value);
+        });
+
+        try {
+            const response = await fetch("http://localhost:8080/gerar-arte", {
+                method: "POST",
+                body: formData
+            });
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = document.getElementById('nome_zip').value + ".zip";
+            a.click();
+        } catch (e) {
+            alert("Erro ao processar coleção.");
+        }
+    }
+</script>
+</body>
+</html>
