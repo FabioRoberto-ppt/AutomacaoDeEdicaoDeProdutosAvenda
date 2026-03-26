@@ -13,9 +13,9 @@ export default function Plans() {
                     <h3>FREE</h3>
                     <div className="price">R$ 0<span>/mês</span></div>
                     <ul>
-                        <li>5 Artes Diárias</li>
+                        <li>15 Artes Diárias</li>
                         <li>Qualidade Standard</li>
-                        <li>Com Marca d&apos;água</li>
+                        <li>Sem integraçãos </li>
                     </ul>
                     <button type="button" className="btn-plan">SELECIONAR</button>
                 </div>
@@ -24,12 +24,12 @@ export default function Plans() {
                 <div className="plan-card featured">
                     <div className="badge">MAIS POPULAR</div>
                     <h3>PREMIUM</h3>
-                    <div className="price">R$ 49<span>/mês</span></div>
+                    <div className="price">R$ 25<span>/mês</span></div>
                     <ul>
                         <li>Artes Ilimitadas</li>
                         <li>Qualidade Ultra HD</li>
-                        <li>Sem Marca d&apos;água</li>
-                        <li>Suporte Prioritário</li>
+                        <li>Com integrações</li>
+                        <li>Processamento em lote</li>
                     </ul>
                     <button type="button" className="btn-plan">ASSINAR AGORA</button>
                 </div>
@@ -38,7 +38,7 @@ export default function Plans() {
                 <div className="plan-card pro">
                     <div className="badge pro-badge">PRO</div>
                     <h3>PRO</h3>
-                    <div className="price">R$ 99<span>/mês</span></div>
+                    <div className="price">R$ 50<span>/mês</span></div>
                     <ul>
                         <li>Tudo do Premium</li>
                         <li>API de Integração</li>

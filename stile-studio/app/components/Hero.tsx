@@ -18,7 +18,7 @@ export default function Hero() {
                     priority // Essencial aqui, pois é a imagem principal do topo da página
                 />
                 <p>
-                    A revolução na automação de conteúdos streetwear. Remova fundos e gere stories profissionais em segundos.
+                    A revolução na automação de conteúdos streetwear. Remova fundos e gere posts profissionais em segundos.
                 </p>
                 <a href="#ferramenta" className="btn-hero">COMEÇAR AGORA</a>
             </div>

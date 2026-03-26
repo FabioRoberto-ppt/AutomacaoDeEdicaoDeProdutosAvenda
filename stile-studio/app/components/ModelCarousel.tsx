@@ -22,16 +22,33 @@ export default function ModelCarousel() {
     }, [isInitialized]);
 
     // Dados dos modelos
-    const models = Array.from({ length: 20 }, (_, i) => ({
-        id: i + 1,
-        name: `Modelo ${i + 1}`,
-        category: ['Fashion', 'Editorial', 'Commercial'][i % 3],
-        thumbnail: `https://picsum.photos/seed/${i + 1}/400/500`,
-        photos: Array.from({ length: 5 }, (_, j) => ({
-            id: j + 1,
-            url: `https://picsum.photos/seed/${i + 1}-${j + 1}/800/1000`
-        }))
-    }));
+    const models = [
+        {
+            id: 1,
+            name: "Street Wear",
+            category: "Fashion",
+            thumbnail: "/imagens carrossel/StreetWear/1CapaStreetWear.jpg",
+            photos: [
+                { id: 1, url: "/imagens carrossel/StreetWear/1CapaStreetWear.jpg" },
+                { id: 2, url: "/imagens carrossel/StreetWear/2ProdutoStreetWear.jpg" },
+                { id: 3, url: "/imagens carrossel/StreetWear/3ProdutoStreetWear.jpg" },
+                { id: 4, url: "/imagens carrossel/StreetWear/4ProdutoStreetWear.jpg" },
+                { id: 5, url: "/imagens carrossel/StreetWear/5ProdutoStreetWear.jpg" },
+                { id: 6, url: "/imagens carrossel/StreetWear/6LinkNaBioStreetWear.jpg" },
+                { id: 7, url: "/imagens carrossel/StreetWear/7ComentariosStreetWear.jpg" },
+            ]
+        },
+        {
+            id: 2,
+            name: "Em Produção",
+            category: "Editorial",
+            thumbnail: "/imagens carrossel/EmProducao/EmProducao.jpg",
+            photos: [
+                { id: 1, url: "/imagens carrossel/EmProducao/EmProducao.jpg" },
+            ]
+        }
+        // Adicione quantos modelos quiser seguindo esse padrão
+    ];
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -100,7 +117,7 @@ export default function ModelCarousel() {
             const scrollPosition = carouselRef.current.scrollLeft;
             const maxScroll = carouselRef.current.scrollWidth - carouselRef.current.clientWidth;
 
-            carouselRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
+            carouselRef.current.scrollBy({left: cardWidth, behavior: 'smooth'});
 
             // Se chegou perto do final, reposiciona no meio
             setTimeout(() => {
@@ -117,7 +134,7 @@ export default function ModelCarousel() {
             const cardWidth = 350;
             const scrollPosition = carouselRef.current.scrollLeft;
 
-            carouselRef.current.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+            carouselRef.current.scrollBy({left: -cardWidth, behavior: 'smooth'});
 
             // Se chegou perto do início, reposiciona no meio
             setTimeout(() => {
@@ -148,11 +165,11 @@ export default function ModelCarousel() {
                 filter: 'blur(60px)',
                 pointerEvents: 'none',
                 zIndex: 0
-            }} />
+            }}/>
 
-            <div style={{ maxWidth: '1400px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <div style={{maxWidth: '1400px', margin: '0 auto', position: 'relative', zIndex: 1}}>
                 {/* Título */}
-                <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+                <div style={{textAlign: 'center', marginBottom: '50px'}}>
                     <h1 style={{
                         fontSize: '48px',
                         fontWeight: '900',
@@ -161,15 +178,15 @@ export default function ModelCarousel() {
                         marginBottom: '10px',
                         letterSpacing: '-1px'
                     }}>
-                        Galeria de <span style={{ color: '#9182d5' }}>Modelos</span>
+                        Galeria de <span style={{color: '#9182d5'}}>Modelos</span>
                     </h1>
-                    <p style={{ color: '#a0a0a0', fontSize: '16px' }}>
+                    <p style={{color: '#a0a0a0', fontSize: '16px'}}>
                         Arraste para navegar • Clique para ver as fotos
                     </p>
                 </div>
 
                 {/* Container do Carrossel com setas */}
-                <div style={{ position: 'relative', overflow: 'visible' }}>
+                <div style={{position: 'relative', overflow: 'visible'}}>
                     {/* Seta Esquerda */}
                     <button
                         onClick={scrollToPrev}
