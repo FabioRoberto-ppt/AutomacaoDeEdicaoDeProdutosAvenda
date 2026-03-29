@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -30,7 +31,6 @@ export default function Navbar() {
                     />
                 </div>
 
-                {/* Só links de navegação aqui, sem Registrar */}
                 <ul className={`nav-links ${menuOpen ? 'nav-links--open' : ''}`}>
                     <li><a href="#home" onClick={handleLinkClick}>Home</a></li>
                     <li><a href="#ferramenta" onClick={handleLinkClick}>Ferramenta</a></li>
@@ -46,17 +46,17 @@ export default function Navbar() {
                         />
                     </li>
                     <li className="nav-links__login-mobile">
-                        <a href="#registrar" className="nav-link-register" onClick={handleLinkClick}>
+                        <Link href="/register" className="nav-link-register" onClick={handleLinkClick}>
                             Registrar-se
-                        </a>
+                        </Link>
                     </li>
                 </ul>
 
-                {/* Desktop: Registrar + API Key — lado direito */}
+                {/* Desktop */}
                 <div className="nav-auth nav-auth--desktop">
-                    <a href="#registrar" className="nav-link-register">
+                    <Link href="/register" className="nav-link-register">
                         Registrar-se
-                    </a>
+                    </Link>
                     <input
                         type="text"
                         id="api_key"
