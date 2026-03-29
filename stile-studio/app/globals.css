@@ -113,7 +113,7 @@ body::after {
   height: 90px;
 }
 
-/* Logo da Navbar - Centralizada com Z-Index Independente */
+/* Logo */
 .logo {
   display: flex;
   align-items: center;
@@ -139,10 +139,13 @@ body::after {
   filter: drop-shadow(0 0 15px var(--roxo-glow));
 }
 
+/* Nav Links — Desktop */
 .nav-links {
   display: flex;
   list-style: none;
   gap: 30px;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-links a {
@@ -172,22 +175,164 @@ body::after {
   color: var(--roxo-primary);
 }
 
+/* Nav Auth */
 .nav-auth {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
+/* ── Hambúrguer ── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1100;
+  color: var(--text-white);
+}
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text-white);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform-origin: center;
+}
+.hamburger--open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+  background: var(--roxo-primary);
+}
+.hamburger--open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.hamburger--open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+  background: var(--roxo-primary);
+}
+/* ── Overlay ── */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+/* ── Input só no mobile (dentro do drawer) ── */
+.nav-links__api-mobile {
+  display: none;
+}
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+  /* Esconde input do desktop */
+  .nav-auth--desktop {
+    display: none;
+  }
+  /* Drawer lateral */
+  .nav-links {
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: min(280px, 80vw);
+    height: 100dvh;
+    background: rgba(5, 5, 5, 0.98);
+    backdrop-filter: blur(20px);
+    border-left: 1px solid var(--border-color);
+    padding: 110px 32px 40px;
+    gap: 8px;
+    z-index: 1000;
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.5);
+  }
+  .nav-links--open {
+    right: 0;
+  }
+  /* Links maiores no mobile */
+  .nav-links li {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+  }
+  .nav-links li:last-of-type {
+    border-bottom: none;
+  }
+  .nav-links a {
+    font-size: 1.1rem;
+    display: block;
+    padding: 8px 0;
+  }
+  /* Glow no hover dentro do drawer */
+  .nav-links a:hover {
+    color: var(--roxo-primary);
+    text-shadow: 0 0 8px var(--roxo-glow);
+  }
+  /* Input aparece no final do drawer */
+  .nav-links__api-mobile {
+    display: block;
+    margin-top: 24px;
+  }
+  .nav-links__api-mobile .api-min-input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
 .api-min-input {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   color: var(--text-white);
-  padding: 10px 18px;
+  padding: 8px 18px; /* mesmo padding vertical do botão */
   border-radius: 8px;
   font-size: 0.85rem;
   transition: all 0.3s ease;
   font-weight: 500;
-  min-width: 200px;
+  min-width: unset; /* remove o min-width fixo */
+  width: 180px;     /* largura fixa igual ao botão */
+  height: 38px;     /* altura fixa */
+}
+
+.nav-link-register {
+  padding: 0 18px !important;
+  height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid var(--roxo-primary) !important;
+  border-radius: 8px !important;
+  background: var(--roxo-primary) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.3s ease !important;
+  white-space: nowrap !important;
+  width: 180px !important;
+  text-decoration: none !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.nav-link-register:hover {
+  background: var(--roxo-dark) !important;
+  border-color: var(--roxo-dark) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px var(--roxo-glow) !important;
+}
+
+.nav-link-register::after,
+.nav-link-register::before {
+  display: none !important;
+  content: none !important;
 }
 
 .api-min-input::placeholder {
@@ -1252,4 +1397,189 @@ textarea:focus {
 .upload-container:hover {
   border-color: #9182d5 !important;
   transition: 0.3s;
+}
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1200;
+  position: fixed;
+  top: 25px;
+  right: 5%;
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+}
+.btn-login {
+    padding: 0.45rem 1.2rem;
+    border: 1.5px solid currentColor; /* ou sua cor de destaque */
+    border-radius: 6px;
+    background: transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-login:hover {
+    background: currentColor; /* inverte as cores no hover */
+    color: var(--background); /* ajuste para a variável do seu tema */
+}
+
+/* Mobile: botão ocupa largura total dentro do menu */
+.nav-links__login-mobile {
+    list-style: none;
+}
+
+.nav-links__login-mobile .btn-login {
+    width: 100%;
+    padding: 0.6rem;
+}
+/* Remove o btn-login antigo e adiciona o estilo inline nos links */
+.btn-login,
+.nav-links__login-mobile {
+    display: none; /* não usados mais */
+}
+
+/* Link "Registrar-se" — estilo pill roxo igual ao btn-plan */
+.nav-link-register {
+    display: inline-block;
+    padding: 8px 20px !important;
+    border: 2px solid var(--roxo-primary) !important;
+    border-radius: 8px;
+    color: var(--roxo-primary) !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease !important;
+    white-space: nowrap;
+}
+
+.nav-link-register::after {
+    display: none !important; /* remove o underline animado */
+}
+
+.nav-link-register:hover {
+    background: var(--roxo-primary) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--roxo-glow);
+    text-shadow: none !important;
+}
+
+/* Mobile: registrar dentro do drawer */
+@media (max-width: 768px) {
+    .nav-link-register {
+        display: block;
+        text-align: center;
+    }
+}
+/* Alinha o item do Registrar-se verticalmente com os outros links */
+.nav-links li:has(.nav-link-register) {
+    display: flex;
+    align-items: center;
+}
+
+.nav-link-register {
+    display: inline-block;
+    padding: 7px 18px !important;
+    border: 2px solid var(--roxo-primary) !important;
+    border-radius: 8px;
+    color: var(--roxo-primary) !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease !important;
+    white-space: nowrap;
+    line-height: 1; /* evita altura extra */
+    vertical-align: middle;
+}
+.nav-link-register::after {
+    display: none !important;
+    content: none !important;
+}
+.nav-links li:has(.nav-link-register) {
+    display: flex;
+    align-items: center;
+    padding-bottom: 0 !important; /* zera qualquer padding extra */
+    border-bottom: none !important;
+}
+
+.nav-link-register {
+    padding: 6px 18px !important;
+    border: 2px solid var(--roxo-primary) !important;
+    border-radius: 8px;
+    color: var(--roxo-primary) !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease !important;
+    white-space: nowrap;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+}
+
+.nav-link-register::after,
+.nav-link-register::before {
+    display: none !important;
+    content: none !important;
+}
+.nav-links {
+    align-items: center; /* adicione esta linha */
+}
+.nav-links__login-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .nav-links__login-mobile {
+        display: block;
+    }
+
+    /* Esconde o do desktop no mobile */
+    .nav-auth--desktop {
+        display: none;
+    }
+}
+
+/* Esconde itens mobile no desktop */
+.nav-links__api-mobile,
+.nav-links__login-mobile {
+    display: none !important;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    /* Esconde o bloco desktop inteiro */
+    .nav-auth--desktop {
+        display: none !important;
+    }
+
+    /* Mostra itens mobile dentro do drawer */
+    .nav-links__api-mobile,
+    .nav-links__login-mobile {
+        display: block !important;
+        margin-top: 12px;
+        border-bottom: none !important;
+    }
+
+    .nav-links__login-mobile .nav-link-register {
+        display: block;
+        text-align: center;
+        width: 100%;
+        padding: 10px !important;
+    }
 }

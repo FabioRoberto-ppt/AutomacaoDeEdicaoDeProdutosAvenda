@@ -131,20 +131,222 @@ public class ProdutoStreetWear {
         // ============================================================
         // ENDPOINT /gerar-bio - CHAMADA BIO (FUTURO)
         // ============================================================
+        // ============================================================
+// ENDPOINT /gerar-bio - CHAMADA PARA LINKS NA BIO (ESTILO TRIO)
+// ============================================================
         app.post("/gerar-bio", ctx -> {
-            System.out.println("📥 Requisição em /gerar-bio");
-            ctx.status(501).result("Endpoint /gerar-bio ainda não implementado");
+            try {
+                String instagram = ctx.formParam("instagram");
+                String textoLink = ctx.formParam("texto_link");
+                UploadedFile imagemProduto = ctx.uploadedFile("imagem_produto");
+                String apiKey = ctx.formParam("api_key");
+
+                String assinatura = (instagram == null || instagram.isBlank()) ? "@stile_" : instagram;
+                String chamada = (textoLink == null || textoLink.isBlank()) ? "SEU TÊNIS ESTÁ AQUI" : textoLink;
+
+                int w = 1080, h = 1920;
+                BufferedImage base = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = base.createGraphics();
+
+                // Configurações de renderização de alta qualidade
+                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+                // --- CAMADA 1: FUNDO ---
+                g.setColor(new Color(240, 240, 240));
+                g.fillRect(0, 0, w, h);
+
+                Font ultra = carregarFonte("/Ultra-Regular.ttf", 60);
+                Color roxo = new Color(145, 130, 213);
+                Color cinzaTexto = new Color(110, 110, 110);
+
+                // --- CAMADA 2: TEXTOS SUPERIORES ---
+                g.setFont(ultra.deriveFont(80f));
+                g.setColor(cinzaTexto);
+                centralizar(g, "LINKS NA", w, 220);
+
+                g.setFont(ultra.deriveFont(380f));
+                g.setColor(roxo);
+                centralizar(g, "bio", w, 540);
+
+                g.setFont(ultra.deriveFont(35f));
+                g.setColor(cinzaTexto);
+                // Ajustado para manter o padrão da primeira imagem (Caps Lock e Emoji)
+                centralizar(g, chamada.toUpperCase() + " 👇", w, 620);
+
+                // --- CAMADA 3: O PRODUTO (O TRIO) ---
+                if (imagemProduto != null) {
+                    File tempIn = File.createTempFile("bio_raw_", ".png");
+                    Files.copy(imagemProduto.content(), tempIn.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    File tempNobg = File.createTempFile("bio_nobg_", ".png");
+
+                    removerFundoReal(tempIn, tempNobg, apiKey);
+                    BufferedImage prod = ImageIO.read(tempNobg);
+
+                    if (prod != null) {
+                        // 1. TAMANHO AMPLIADO (Para dar destaque ao produto)
+                        int maxW = 1050;
+                        int maxH = 1100;
+                        double scale = Math.min((double) maxW / prod.getWidth(), (double) maxH / prod.getHeight());
+                        int pW = (int) (prod.getWidth() * scale);
+                        int pH = (int) (prod.getHeight() * scale);
+
+                        // 2. POSICIONAMENTO VERTICAL E ESPAÇAMENTO
+                        int posY = 700;
+                        int offsetX = 150; // Distância entre as cópias do rastro
+
+                        // 3. POSICIONAMENTO HORIZONTAL (DESLOCADO PARA A DIREITA)
+                        // Somamos 120 pixels ao centro para empurrar o personagem principal para a direita
+                        int xPrincipal = ((w - pW) / 2) + 120;
+
+                        // --- DESENHO EM CAMADAS (De trás para frente) ---
+
+                        // Rastro 1: Mais à esquerda e bem transparente (20%)
+                        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.2f));
+                        g.drawImage(prod, xPrincipal - (offsetX * 2), posY, pW, pH, null);
+
+                        // Rastro 2: No meio do caminho e meia opacidade (50%)
+                        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+                        g.drawImage(prod, xPrincipal - offsetX, posY, pW, pH, null);
+
+                        // Personagem Principal: Na frente, totalmente opaco e à direita
+                        g.setComposite(AlphaComposite.SrcOver);
+                        g.drawImage(prod, xPrincipal, posY, pW, pH, null);
+                    }
+                    tempIn.delete();
+                    tempNobg.delete();
+                }
+
+                // --- CAMADA 4: RODAPÉ ---
+                g.setComposite(AlphaComposite.SrcOver);
+                g.setFont(ultra.deriveFont(45f));
+                g.setColor(cinzaTexto);
+                centralizar(g, assinatura.toLowerCase(), w, 1750);
+
+                g.dispose();
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(base, "png", baos);
+                ctx.contentType("image/png").result(baos.toByteArray());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                ctx.status(500).result("Erro: " + e.getMessage());
+            }
         });
-        System.out.println("✅ Endpoint POST /gerar-bio REGISTRADO (pendente)");
 
         // ============================================================
         // ENDPOINT /gerar-fechamento - STORY FECHAMENTO (FUTURO)
         // ============================================================
         app.post("/gerar-fechamento", ctx -> {
-            System.out.println("📥 Requisição em /gerar-fechamento");
-            ctx.status(501).result("Endpoint /gerar-fechamento ainda não implementado");
+            try {
+                String instagram = ctx.formParam("instagram");
+                UploadedFile imagemProduto = ctx.uploadedFile("imagem_produto");
+                String apiKey = ctx.formParam("api_key");
+
+                String assinatura = (instagram == null || instagram.isBlank()) ? "@stile_" : instagram;
+
+                int w = 1080, h = 1920;
+                BufferedImage base = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = base.createGraphics();
+
+                // Renderização de alta qualidade
+                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+                // --- CAMADA 1: FUNDO ---
+                g.setColor(new Color(240, 240, 240));
+                g.fillRect(0, 0, w, h);
+
+                Font ultra = carregarFonte("/Ultra-Regular.ttf", 60);
+                Color roxo = new Color(145, 130, 213);
+                Color cinzaTexto = new Color(110, 110, 110);
+
+                // --- CAMADA 2: TEXTOS SUPERIORES (TAMANHO MÁXIMO ESTILO CANVA) ---
+                g.setFont(ultra.deriveFont(80f));
+                g.setColor(cinzaTexto);
+                centralizar(g, "OU PEÇA NOS", w, 210);
+
+                g.setColor(roxo);
+                String linha1 = "comentarios";
+                String linha2 = "o link";
+
+// 1. Começamos com um tamanho gigante (300) para o Java reduzir até o limite
+                float tamanhoFinal = 300f;
+
+// 2. O limite agora é 1060px (isso deixa apenas 10px de cada lado, como no Canva)
+// Importante: Usamos Font.PLAIN porque a fonte 'Ultra' já é gorda por natureza
+                g.setFont(ultra.deriveFont(tamanhoFinal));
+
+                while (g.getFontMetrics().stringWidth(linha1) > 1060) {
+                    tamanhoFinal -= 1f;
+                    g.setFont(ultra.deriveFont(tamanhoFinal));
+                }
+
+// 3. Aplica o tamanho máximo encontrado para as duas linhas
+                centralizar(g, linha1, w, 380);
+
+// Ajustei o Y da segunda linha para 510 para ficar "coladinho" como no seu print
+                centralizar(g, linha2, w, 510);
+
+                // --- CAMADA 3: O PRODUTO (O RESTO DO SEU CÓDIGO SEGUE ABAIXO...) ---
+                if (imagemProduto != null) {
+                    File tempIn = File.createTempFile("fech_raw_", ".png");
+                    Files.copy(imagemProduto.content(), tempIn.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    File tempNobg = File.createTempFile("fech_nobg_", ".png");
+
+                    removerFundoReal(tempIn, tempNobg, apiKey);
+                    BufferedImage prod = ImageIO.read(tempNobg);
+
+                    if (prod != null) {
+                        // Tamanho ampliado para destaque
+                        int maxW = 1050;
+                        int maxH = 1100;
+                        double scale = Math.min((double) maxW / prod.getWidth(), (double) maxH / prod.getHeight());
+                        int pW = (int) (prod.getWidth() * scale);
+                        int pH = (int) (prod.getHeight() * scale);
+
+                        int posY = 620; // Posição abaixo dos textos "o link"
+                        int offsetX = 150;
+
+                        // Posição horizontal deslocada para a direita (+120)
+                        int xPrincipal = ((w - pW) / 2) + 120;
+
+                        // 1. Rastro mais distante (Esquerda - 20% opacidade)
+                        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.2f));
+                        g.drawImage(prod, xPrincipal - (offsetX * 2), posY, pW, pH, null);
+
+                        // 2. Rastro intermediário (50% opacidade)
+                        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+                        g.drawImage(prod, xPrincipal - offsetX, posY, pW, pH, null);
+
+                        // 3. Imagem Principal (Frente - 100% opaco)
+                        g.setComposite(AlphaComposite.SrcOver);
+                        g.drawImage(prod, xPrincipal, posY, pW, pH, null);
+                    }
+                    tempIn.delete();
+                    tempNobg.delete();
+                }
+
+                // --- CAMADA 4: RODAPÉ ---
+                g.setComposite(AlphaComposite.SrcOver);
+                g.setFont(ultra.deriveFont(45f));
+                g.setColor(cinzaTexto);
+                centralizar(g, assinatura.toLowerCase(), w, 1750);
+
+                g.dispose();
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(base, "png", baos);
+                ctx.contentType("image/png").result(baos.toByteArray());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                ctx.status(500).result("Erro: " + e.getMessage());
+            }
         });
-        System.out.println("✅ Endpoint POST /gerar-fechamento REGISTRADO (pendente)");
 
         // ============================================================
         // ENDPOINT /gerar-imagem - STORY PRODUTO (ORIGINAL)

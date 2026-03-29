@@ -79,70 +79,84 @@ export default function PhotoGrid() {
         }
     };
 
-    const handleGenerateSingle = async (index) => {
-        const item = fotosArray[index];
-        const apiKey = (localStorage.getItem('remove_bg_key') || '').trim();
-        const configModo = modos.find(m => m.id === item.modoOrigem);
+   const handleGenerateSingle = async (index) => {
+       const item = fotosArray[index];
+       const apiKey = (localStorage.getItem('remove_bg_key') || '').trim();
+       const configModo = modos.find(m => m.id === item.modoOrigem);
 
-        if (!configModo) {
-            alert(`Erro: Modo "${item.modoOrigem}" não encontrado!`);
-            return;
-        }
+       if (!configModo) {
+           alert(`Erro: Modo "${item.modoOrigem}" não encontrado!`);
+           return;
+       }
 
-        setLoading(true);
-        const formData = new FormData();
-        formData.append('foto', item.arquivo);
-        formData.append('api_key', apiKey);
-        formData.append('instagram', item.usuarioProd);
+       setLoading(true);
+       const formData = new FormData();
 
-        // Define os campos e a URL baseada no modo da foto
-        if (item.modoOrigem === 'CAPA') {
-            formData.append('input1', item.input1);
-            formData.append('input2', item.input2);
-            formData.append('input3', item.input3);
-            formData.append('input4', item.input4);
+       // 1. Tratamento da Imagem (O Java espera 'imagem_produto' para CAPA/BIO/FECHAMENTO e 'foto' para PRODUTO)
+       if (item.modoOrigem === 'PRODUTO') {
+           formData.append('foto', item.arquivo);
+       } else {
+           formData.append('imagem_produto', item.arquivo);
+       }
 
-            // NOVO: Adiciona a imagem do produto se existir
-            if (item.imagemProduto) {
-                formData.append('imagem_produto', item.imagemProduto);
-            }
-        } else if (item.modoOrigem === 'BIO') {
-            formData.append('input1', item.input1);
-            formData.append('input2', item.input2);
-            formData.append('input3', item.input3);
-        } else if (item.modoOrigem === 'FECHAMENTO') {
-            formData.append('input1', item.input1);
-            formData.append('input2', item.input2);
-        } else {
-            formData.append('texto_topo', item.textoTopo);
-            formData.append('codigo', item.codigo);
-            formData.append('numero', item.numero);
-            formData.append('preco_de', item.precoDe);
-            formData.append('preco_por', item.precoPor);
-            formData.append('texto_variacao', item.variacao);
-        }
+       // 2. Parâmetros Comuns
+       formData.append('api_key', apiKey);
+       formData.append('instagram', item.usuarioProd);
 
-        try {
-            const response = await fetch(`http://localhost:8080${configModo.endpoint}`, {
-                method: 'POST',
-                body: formData
-            });
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText);
-            }
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `STILE_${item.modoOrigem}_${Date.now()}.png`;
-            link.click();
-        } catch (error) {
-            alert("Erro no Java! Verifique o endpoint: " + configModo.endpoint + "\n\n" + error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+       // 3. Parâmetros Específicos por Endpoint
+       if (item.modoOrigem === 'CAPA') {
+           formData.append('input1', item.input1 || '');
+           formData.append('input2', item.input2 || '');
+           formData.append('input3', item.input3 || '');
+           formData.append('input4', item.input4 || '');
+       }
+       else if (item.modoOrigem === 'BIO') {
+           // O Java espera 'texto_link' no endpoint /gerar-bio
+           formData.append('texto_link', item.input3 || '');
+       }
+       else if (item.modoOrigem === 'FECHAMENTO') {
+           // O Java para fechamento não usa input1/input2 no código enviado,
+           // mas se você for adicionar, o padrão seria este:
+           formData.append('input1', item.input1 || '');
+           formData.append('input2', item.input2 || '');
+       }
+       else if (item.modoOrigem === 'PRODUTO') {
+           formData.append('texto_topo', item.textoTopo);
+           formData.append('codigo', item.codigo);
+           formData.append('numero', item.numero);
+           formData.append('preco_de', item.precoDe);
+           formData.append('preco_por', item.precoPor);
+           formData.append('texto_variacao', item.variacao);
+       }
+
+       try {
+           const response = await fetch(`http://localhost:8080${configModo.endpoint}`, {
+               method: 'POST',
+               body: formData // Não defina Content-Type manualmente, o browser fará isso com o boundary correto
+           });
+
+           if (!response.ok) {
+               const errorText = await response.text();
+               throw new Error(errorText);
+           }
+
+           const blob = await response.blob();
+           const url = window.URL.createObjectURL(blob);
+           const link = document.createElement('a');
+           link.href = url;
+           link.download = `STILE_${item.modoOrigem}_${Date.now()}.png`;
+           document.body.appendChild(link);
+           link.click();
+           document.body.removeChild(link);
+           window.URL.revokeObjectURL(url);
+
+       } catch (error) {
+           console.error(error);
+           alert("Erro no Java!\nEndpoint: " + configModo.endpoint + "\nErro: " + error.message);
+       } finally {
+           setLoading(false);
+       }
+   };
 
     return (
         <div className="photo-grid-container">
