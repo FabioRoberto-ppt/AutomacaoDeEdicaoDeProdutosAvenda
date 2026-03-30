@@ -26,3 +26,6 @@ EXPOSE 8080
 # Comando de inicialização otimizado para o Render Free (512MB RAM)
 # -Xmx384m deixa uma folga para o sistema operacional não matar o processo
 CMD ["java", "-Xmx384m", "-Xms256m", "-jar", "app.jar"]
+
+
+asassa
